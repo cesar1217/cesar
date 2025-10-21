@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Tablas de multiplicar</title>
+    <style>
+        :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue","Noto Sans",Arial;line-height:1.4}
+        body{margin:20px;background:#f6f8fa;color:#111}
+        header{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+        h1{font-size:1.2rem;margin:0}
+        .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+        input[type="number"]{width:72px;padding:6px;border:1px solid #cbd5e1;border-radius:6px}
+        button{padding:8px 12px;border:0;background:#0366d6;color:#fff;border-radius:6px;cursor:pointer}
+        button:active{transform:translateY(1px)}
+        label{font-size:.95rem}
+        .options{display:flex;gap:8px;align-items:center}
+        #output{margin-top:14px;display:grid;grid-template-columns: repeat(auto-fit,minmax(180px,1fr));gap:12px}
+        .card{background:#fff;padding:10px;border-radius:8px;box-shadow:0 1px 3px rgba(2,6,23,.06);border:1px solid rgba(2,6,23,.04)}
+        .card h3{margin:0 0 8px;font-size:1rem}
+        .row{display:flex;justify-content:space-between;padding:2px 0}
+        .muted{color:#555;font-size:.9rem}
+        footer{margin-top:18px;font-size:.85rem;color:#555}
+        @media(print){
+            body{margin:8mm}
+            button,input{display:none}
+            #output{grid-template-columns:repeat(4,1fr)}
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Tablas de multiplicar</h1>
+        <div class="controls">
+            <label>
+                Desde
+                <input id="from" type="number" min="1" max="100" value="1">
+            </label>
+            <label>
+                Hasta
+                <input id="to" type="number" min="1" max="100" value="10">
+            </label>
+            <label>
+                Multiplicador máximo
+                <input id="max" type="number" min="1" max="50" value="10">
+            </label>
+            <button id="generate">Mostrar</button>
+            <button id="print">Imprimir</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="output" aria-live="polite"></div>
+        <footer>Introduce un rango (por ejemplo desde 1 hasta 10) y el máximo multiplicador. Pulsa "Mostrar".</footer>
+    </main>
+
+    <script>
+        const fromEl = document.getElementById('from');
+        const toEl = document.getElementById('to');
+        const maxEl = document.getElementById('max');
+        const out = document.getElementById('output');
+        const genBtn = document.getElementById('generate');
+        const printBtn = document.getElementById('print');
+
+        function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+        function generar() {
+            out.innerHTML = '';
+            let a = parseInt(fromEl.value) || 1;
+            let b = parseInt(toEl.value) || 1;
+            const max = clamp(parseInt(maxEl.value) || 10, 1, 100);
+            if (a > b) { [a,b] = [b,a]; } // swap if inverted
+            a = clamp(a, 1, 100);
+            b = clamp(b, 1, 100);
+
+            for (let n = a; n <= b; n++) {
+                const card = document.createElement('section');
+                card.className = 'card';
+                const title = document.createElement('h3');
+                title.textContent = `Tabla del ${n}`;
+                card.appendChild(title);
+
+                for (let i = 1; i <= max; i++) {
+                    const row = document.createElement('div');
+                    row.className = 'row';
+                    const left = document.createElement('div');
+                    left.textContent = `${n} × ${i}`;
+                    const right = document.createElement('div');
+                    right.textContent = n * i;
+                    right.className = 'muted';
+                    row.appendChild(left);
+                    row.appendChild(right);
+                    card.appendChild(row);
+                }
+
+                out.appendChild(card);
+            }
+            if (out.children.length === 0) {
+                out.textContent = 'No hay tablas para mostrar.';
+            }
+        }
+
+        genBtn.addEventListener('click', generar);
+        printBtn.addEventListener('click', () => window.print());
+
+        // generar al cargar la página
+        window.addEventListener('load', generar);
+    </script>
+</body>
+</html>
